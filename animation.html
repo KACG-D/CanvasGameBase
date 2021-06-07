@@ -5,7 +5,7 @@
     <title>Animation</title>
     <style>
     	* { padding: 0; margin: 0; }
-    	canvas { background:#eee; display: block; margin: 0 auto; }
+    	canvas { background:"#afafb3"; display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
@@ -47,6 +47,36 @@ class DrawObject{
         }
     }
 }
+class Card extends DrawObject{
+    static colors = ["#009944","#de82a7","#006eb0","#9fc24d","#6b395f","#00ac97","#ff9500","#f62e36","#b5b5ac","#009bbf","#00bb85","#00ac9b","#9c5e31","#f39700","#e60012","#9caeb7","#00a7db","#009944","#d7c447","#9b7cb6","#00ada9","#bb641d","#e85298","#0079c2","#6cbb5a","#b6007a","#e5171f","#522886","#0078ba","#019a66","#e44d93","#814721","#a9cc51","#ee7b1a","#00a0de"];
+  
+    constructor(x,y,canvas,num){
+        super(x,y,canvas);
+        this.num = num;
+    }
+
+    draw(){
+        let width = 60;
+        let height = 100;
+        ctx.fillStyle = Card.colors[this.num-1];
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 6
+        this.canvas.strokeRect(this.x, this.y, width, height);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 5;
+        this.canvas.fillRect(this.x, this.y, width, height);
+        this.canvas.strokeRect(this.x, this.y, width, height);
+
+
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.font = 'bold 30px serif';
+        ctx.textBaseline = "middle";
+        ctx.textAlign="center";
+        ctx.lineWidth = 0;
+        this.canvas.fillText(this.num+"",this.x+width/2, this.y+height/2);
+    }
+}
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -55,8 +85,8 @@ var ctx = canvas.getContext("2d");
 dolist = [];
 
 //テスト用にDrawObjectいっぱいいれとく
-for(i =0;i<30;i++){
-    dolist.push(new DrawObject(0,0,ctx));
+for(i =1;i<=35;i++){
+    dolist.push(new Card(0,0,ctx,i));
 }
 //ここまで
 setInterval(tick,25);
