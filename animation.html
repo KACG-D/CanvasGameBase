@@ -53,32 +53,57 @@ class Player extends DrawObject{
     constructor(x,y,ctx,num){
         super(x,y,ctx);
         this.num = num;
-        this.score = 0
-        this.coin = 10
-        this.deck = []
+        this.score = 0;
+        this.coin = 10;
+        this.deck = [];
     }
     draw(){
-        let width = 300;
-        let height = 150;
         let offset = 10;
+        let card = "card : "+this.deck;
+        let maxLength = 18;
+        let splited = [];
+        for (let i = 0; i < card.length; i+=maxLength) {
+            splited.push(card.slice(i, i+maxLength));
+        }
+        let text =[ 
+        "Player"+this.num,
+        "coin : "+this.coin,
+        "score : "+this.score
+        ];
+
+        splited.forEach(s=>text.push(s));
+
+        let width = 330;
+        let height = 30*text.length+offset*2;
+
         this.ctx.fillStyle = "white";
         this.ctx.strokeStyle = Player.colors[this.num][0];
         this.ctx.lineWidth = 5;
         this.ctx.fillRect(this.x, this.y, width, height);
         this.ctx.strokeRect(this.x, this.y, width, height);
-        this.ctx.font = 'bold 30px serif';
+        this.ctx.font = 'bold 30px メイリオ';
         this.ctx.textBaseline = "top";
         this.ctx.textAlign="left";
         this.ctx.lineWidth = 0;
         this.ctx.fillStyle = Player.colors[this.num][0];
-        let text =[ 
-        "Player"+this.num,
-        "coin : "+this.coin,
-        "score : "+this.score,
-        "card : "+this.deck];
+        
         for(i=0;i<text.length;i++){
             this.ctx.fillText(text[i],this.x+offset, this.y+i*30+offset);
         }
+    }
+    push(cardNum){
+        this.deck.push(cardNum);
+        this.deck.sort();
+    }
+    update(){
+        super.update();
+        if(this.deck.length<=30){
+            this.push(random(35)+1);
+        }else{
+            this.deck.splice(0);
+        }
+        this.coin+=random(3)-1;
+        this.score+=random(3)-1;
     }
 }
 class Coin extends DrawObject{
@@ -116,7 +141,7 @@ class Card extends DrawObject{
         this.ctx.fillRect(this.x, this.y, width, height);
         this.ctx.strokeRect(this.x, this.y, width, height);
         this.ctx.fillStyle = 'white';
-        this.ctx.font = 'bold 30px serif';
+        this.ctx.font = 'bold 30px メイリオ';
         this.ctx.textBaseline = "middle";
         this.ctx.textAlign="center";
         this.ctx.lineWidth = 0;
