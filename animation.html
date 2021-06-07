@@ -15,15 +15,15 @@
 <script>
 
 class DrawObject{
-    constructor(x,y,canvas){
+    constructor(x,y,ctx){
         this.x = x;
         this.y = y;
         this.vx = 0;
         this.vy = 0;
-        this.canvas = canvas;
+        this.ctx = ctx;
     }
     draw(){
-        this.canvas.fillRect(this.x, this.y, 30, 30);
+        this.ctx.fillRect(this.x, this.y, 30, 30);
     }
 
     move(x,y,frame){
@@ -47,34 +47,80 @@ class DrawObject{
         }
     }
 }
+
+class Player extends DrawObject{
+    static colors = [["#4169e1"],["#ea5550"]]
+    constructor(x,y,ctx,num){
+        super(x,y,ctx);
+        this.num = num;
+        this.score = 0
+        this.coin = 10
+        this.deck = []
+    }
+    draw(){
+        let width = 300;
+        let height = 150;
+        let offset = 10;
+        this.ctx.fillStyle = "white";
+        this.ctx.strokeStyle = Player.colors[this.num][0];
+        this.ctx.lineWidth = 5;
+        this.ctx.fillRect(this.x, this.y, width, height);
+        this.ctx.strokeRect(this.x, this.y, width, height);
+        this.ctx.font = 'bold 30px serif';
+        this.ctx.textBaseline = "top";
+        this.ctx.textAlign="left";
+        this.ctx.lineWidth = 0;
+        this.ctx.fillStyle = Player.colors[this.num][0];
+        let text =[ 
+        "Player"+this.num,
+        "coin : "+this.coin,
+        "score : "+this.score,
+        "card : "+this.deck];
+        for(i=0;i<text.length;i++){
+            this.ctx.fillText(text[i],this.x+offset, this.y+i*30+offset);
+        }
+    }
+}
+class Coin extends DrawObject{
+    draw(){
+        let r = 10;
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, r, 0 * Math.PI / 180, 360 * Math.PI / 180, false ) ;
+        this.ctx.fillStyle = "#ea5550" ;
+        this.ctx.fill() ;
+        this.ctx.strokeStyle = "black" ;
+        this.ctx.lineWidth = 3;
+        this.ctx.stroke() ;
+        this.ctx.strokeStyle = "#b3413d" ;
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke() ;
+    }
+}
 class Card extends DrawObject{
     static colors = ["#009944","#de82a7","#006eb0","#9fc24d","#6b395f","#00ac97","#ff9500","#f62e36","#b5b5ac","#009bbf","#00bb85","#00ac9b","#9c5e31","#f39700","#e60012","#9caeb7","#00a7db","#009944","#d7c447","#9b7cb6","#00ada9","#bb641d","#e85298","#0079c2","#6cbb5a","#b6007a","#e5171f","#522886","#0078ba","#019a66","#e44d93","#814721","#a9cc51","#ee7b1a","#00a0de"];
   
-    constructor(x,y,canvas,num){
-        super(x,y,canvas);
+    constructor(x,y,ctx,num){
+        super(x,y,ctx);
         this.num = num;
     }
 
     draw(){
         let width = 60;
         let height = 100;
-        ctx.fillStyle = Card.colors[this.num-1];
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 6
-        this.canvas.strokeRect(this.x, this.y, width, height);
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 5;
-        this.canvas.fillRect(this.x, this.y, width, height);
-        this.canvas.strokeRect(this.x, this.y, width, height);
-
-
-        ctx.fillStyle = 'white';
-        ctx.strokeStyle = 'white';
-        ctx.font = 'bold 30px serif';
-        ctx.textBaseline = "middle";
-        ctx.textAlign="center";
-        ctx.lineWidth = 0;
-        this.canvas.fillText(this.num+"",this.x+width/2, this.y+height/2);
+        this.ctx.fillStyle = Card.colors[this.num-1];
+        this.ctx.strokeStyle = 'black';
+        this.ctx.lineWidth = 6
+        this.ctx.strokeRect(this.x, this.y, width, height);
+        this.ctx.strokeStyle = 'white';
+        this.ctx.lineWidth = 5;
+        this.ctx.fillRect(this.x, this.y, width, height);
+        this.ctx.strokeRect(this.x, this.y, width, height);
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = 'bold 30px serif';
+        this.ctx.textBaseline = "middle";
+        this.ctx.textAlign="center";
+        this.ctx.lineWidth = 0;
+        this.ctx.fillText(this.num+"",this.x+width/2, this.y+height/2);
     }
 }
 
@@ -87,7 +133,11 @@ dolist = [];
 //テスト用にDrawObjectいっぱいいれとく
 for(i =1;i<=35;i++){
     dolist.push(new Card(0,0,ctx,i));
+    dolist.push(new Coin(0,0,ctx));
 }
+
+dolist.push(new Player(0,0,ctx,0));
+dolist.push(new Player(0,0,ctx,1));
 //ここまで
 setInterval(tick,25);
 
@@ -110,3 +160,4 @@ function random(max) {
 
 </body>
 </html>
+
