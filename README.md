@@ -1,0 +1,2 @@
+# CanvasGameBase
+canvasで動くものを作るために最低限のクラスだけ作りました．
