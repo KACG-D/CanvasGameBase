@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<canvas id="myCanvas" width="480" height="320"></canvas>
+<canvas id="myCanvas" width="1920" height="1080"></canvas>
 
 <script>
 
@@ -93,12 +93,12 @@ setInterval(tick,25);
 
 function tick(){
     dolist.forEach(dob =>dob.update());
-    ctx.clearRect(0,0,1000,1000);
+    ctx.clearRect(0,0,2000,2000);
     dolist.forEach(dob =>dob.draw());
 
     //テスト用にframeが0になるたびにランダムムーブ
     dolist.forEach(dob =>{
-        if(dob.frame==0)dob.move(random(450),random(290),10+random(20));
+        if(dob.frame==0)dob.move(random(1980),random(1020),20+random(100));
     });
     //ここまで
 }
