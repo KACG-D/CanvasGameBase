@@ -15,12 +15,14 @@
 <script>
 
 class DrawObject{
-    constructor(x,y,ctx){
+    constructor(x,y,ctx,dolist){
         this.x = x;
         this.y = y;
         this.vx = 0;
         this.vy = 0;
         this.ctx = ctx;
+        this.dolist = dolist;
+        this.actList = [];
     }
     draw(){
         this.ctx.fillRect(this.x, this.y, 30, 30);
@@ -31,10 +33,13 @@ class DrawObject{
         this.vx = (-this.x + x)/frame;
         this.vy = (-this.y + y)/frame;
     }
-    stop(){
+    stop(frame){
         this.vx = 0;
         this.vy = 0;
-        this.frame =0;
+        this.frame =frame;
+    }
+    remove(){
+
     }
     update(){
         this.x += this.vx;
@@ -43,15 +48,44 @@ class DrawObject{
         if(this.frame>=0){
             this.frame--;
         }else{
-            this.stop();
+            this.stop(0);
+            this.next();
         }
+    }
+    next(){
+        if(this.actList.length>=1){
+            var action = this.actList.shift();
+            if(action[0]==this.move){
+                this.move(action[1],action[2],action[3]);   
+            }
+            else if(action[0]==this.end){
+                this.end();
+            }
+            else if(action[0]==this.stop){
+                this.stop(action[1]);
+            }
+        }
+    }
+    book(func,...args){
+        var action = [func];
+        args.forEach(a =>action.push(a));
+        this.actList.push(action);
+    }
+    end(){
+        for(var i =0;i<this.dolist.length;i++){
+            if(this.dolist[i] == this){
+                dolist.splice(i,1);
+                break;
+            }
+        }
+        console.log(dolist);
     }
 }
 
 class Player extends DrawObject{
     static colors = [["#4169e1"],["#ea5550"]]
-    constructor(x,y,ctx,num){
-        super(x,y,ctx);
+    constructor(x,y,ctx,dolist,num){
+        super(x,y,ctx,dolist);
         this.num = num;
         this.score = 0;
         this.coin = 10;
@@ -86,8 +120,8 @@ class Player extends DrawObject{
         this.ctx.textAlign="left";
         this.ctx.lineWidth = 0;
         this.ctx.fillStyle = Player.colors[this.num][0];
-        
-        for(i=0;i<text.length;i++){
+
+        for(var i=0;i<text.length;i++){
             this.ctx.fillText(text[i],this.x+offset, this.y+i*30+offset);
         }
     }
@@ -97,13 +131,9 @@ class Player extends DrawObject{
     }
     update(){
         super.update();
-        if(this.deck.length<=30){
-            this.push(random(35)+1);
-        }else{
-            this.deck.splice(0);
-        }
-        this.coin+=random(3)-1;
-        this.score+=random(3)-1;
+    }
+    pay(num){
+        this.coin -=num;
     }
 }
 class Coin extends DrawObject{
@@ -124,8 +154,8 @@ class Coin extends DrawObject{
 class Card extends DrawObject{
     static colors = ["#009944","#de82a7","#006eb0","#9fc24d","#6b395f","#00ac97","#ff9500","#f62e36","#b5b5ac","#009bbf","#00bb85","#00ac9b","#9c5e31","#f39700","#e60012","#9caeb7","#00a7db","#009944","#d7c447","#9b7cb6","#00ada9","#bb641d","#e85298","#0079c2","#6cbb5a","#b6007a","#e5171f","#522886","#0078ba","#019a66","#e44d93","#814721","#a9cc51","#ee7b1a","#00a0de"];
   
-    constructor(x,y,ctx,num){
-        super(x,y,ctx);
+    constructor(x,y,ctx,dolist,num){
+        super(x,y,ctx,dolist);
         this.num = num;
     }
 
@@ -155,32 +185,60 @@ var ctx = canvas.getContext("2d");
 
 dolist = [];
 
-//テスト用にDrawObjectいっぱいいれとく
-for(i =1;i<=35;i++){
-    dolist.push(new Card(0,0,ctx,i));
-    dolist.push(new Coin(0,0,ctx));
-}
-
-dolist.push(new Player(0,0,ctx,0));
-dolist.push(new Player(0,0,ctx,1));
-//ここまで
 setInterval(tick,25);
+
+openCard = null;
+players = [new Player(0,0,ctx,dolist,0),new Player(500,0,ctx,dolist,1)]
+fieldCoin = 0;
+fieldCoins = [];
+
+dolist.push(players[0]);
+dolist.push(players[1]);
 
 function tick(){
     dolist.forEach(dob =>dob.update());
     ctx.clearRect(0,0,2000,2000);
     dolist.forEach(dob =>dob.draw());
-
-    //テスト用にframeが0になるたびにランダムムーブ
-    dolist.forEach(dob =>{
-        if(dob.frame==0)dob.move(random(1980),random(1020),20+random(100));
-    });
-    //ここまで
 }
 
-function random(max) {
-  return Math.floor(Math.random() * max);
+function open(num){
+    openCard = new Card(500,500,ctx,dolist,num);
+    dolist.push(openCard);
 }
+
+function pass(playerNum){
+    player = players[playerNum];
+    player.pay(1);
+    fieldCoin+=1;
+    coin = new Coin(player.x,player.y,ctx,dolist)
+    //coin.move(openCard.x,openCard.y,20);
+    coin.book(coin.move,openCard.x+randomInt(-20,20),openCard.y+randomInt(-20,20),20)
+    dolist.push(coin);
+    fieldCoins.push(coin)
+    
+}
+function get(playerNum){
+    player = players[playerNum];
+    player.pay(-1*fieldCoin);
+    fieldCoin = 0;
+    for(var i=0;i<fieldCoins.length;i++){
+        fieldCoins[i].book(fieldCoins[i].stop,i*5);
+        fieldCoins[i].book(fieldCoins[i].move,player.x,player.y,20);
+        fieldCoins[i].book(fieldCoins[i].end);
+    }
+    openCard.book(openCard.move,player.x,player.y,30);
+    openCard.book(openCard.end);
+
+    fieldCoins.splice(0);
+}
+function randomInt(min, max) {
+  var interval = max - min + 1;
+
+  return ~~(Math.random() * interval + min);
+}
+
+
+
 </script>
 
 </body>
