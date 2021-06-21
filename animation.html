@@ -10,7 +10,7 @@
 </head>
 <body>
 
-<canvas id="myCanvas" width="480" height="320"></canvas>
+<canvas id="myCanvas" width="1920" height="1080"></canvas>
 
 <script>
 
@@ -23,7 +23,7 @@ class DrawObject{
         this.canvas = canvas;
     }
     draw(){
-        this.canvas.fillRect(this.x, this.y, 30, 30);
+        this.canvas.drawImage(img,this.x,this.y);
     }
 
     move(x,y,frame){
@@ -51,6 +51,13 @@ class DrawObject{
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
 
+var img = new Image();   // 新たな img 要素を作成
+img.addEventListener("load", function() {
+  // drawImage を実行する文をここに置く
+}, false);
+img.src = 'unko.gif'; // ソースのパスを設定
+
+canvas.addEventListener('click', click, false);
 
 dolist = [];
 
@@ -63,18 +70,21 @@ setInterval(tick,25);
 
 function tick(){
     dolist.forEach(dob =>dob.update());
-    ctx.clearRect(0,0,1000,1000);
+    ctx.clearRect(0,0,2000,2000);
     dolist.forEach(dob =>dob.draw());
 
     //テスト用にframeが0になるたびにランダムムーブ
     dolist.forEach(dob =>{
-        if(dob.frame==0)dob.move(random(450),random(290),10+random(20));
+        if(dob.frame==0)dob.move(random(1920),random(1080),10+random(20));
     });
     //ここまで
 }
 
 function random(max) {
   return Math.floor(Math.random() * max);
+}
+function click(){
+    dolist.push(new DrawObject(0,0,ctx))
 }
 </script>
 
